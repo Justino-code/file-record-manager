@@ -128,12 +128,12 @@ int lAdd(FILE *fp){
 }
 
 int lList(FILE *fp){
-  struct Livro registo;
-  fseek(fp, 0, SEEK_SET);
+  Livro registo;
+  rewind(fp);
 
   printf("| Id | Titulo | Autores | Ano |");
 
-  while(fread(&registo, sizeof(struct Livro), 1, fp) == 1){
+  while(fread(&registo, sizeof(Livro), 1, fp) == 1){
     if(registo.id == -1) continue;
 
     printf("\n| %d | %s | ", registo.id, registo.titulo);
