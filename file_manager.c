@@ -13,6 +13,7 @@ int lRemove(FILE *fp);
 Livro lSearch(FILE *fp);
 Livro lCreate(int id);
 int show(Livro l);
+long fileSize(FILE *fp);
                               //l = livro
 int getValue();
 int readLine(char *buffer, int len);
@@ -83,66 +84,46 @@ int getValue(){
   return value - '0';
 }
 
+// Deixa o cursor no final do arquivo
+
+long fileSize(FILE *fp){
+  if(fseek(fp, 0, SEEK_END) != 0)
+    return -1;
+
+  return ftell(fp);
+}
+
 int lAdd(FILE *fp){
-  struct Livro l;
-  int n_autor = 1;
+  int id = 1;
 
   if(fp == NULL){
     printf("arquivo nao pode ser aberto\n");
     return 1;
-  }else{
-    if(fseek(fp, 0, SEEK_END) != 0){
-      printf("erro nao foi posivel mover o cursor");
+  }
+
+  long t = fileSize(fp);
+
+  if(t > 0){
+    Livro u_r;
+    fseek(fp, -sizeof(Livro), SEEK_END);
+    size_t lido = fread(&u_r, sizeof(Livro), 1, fp);
+
+    if(lido < 1) {
+      printf("Erro ao ler registro");
       return 1;
     }
 
-    long int t = ftell(fp);
+    id = u_r.id + 1; // u_r => ultimo registro
 
-    if(t == 0){
-      l.id = 1;
-    }else{
-      struct Livro u_r;
-      fseek(fp, -sizeof(struct Livro), SEEK_END);
-      size_t lido = fread(&u_r, sizeof(struct Livro), 1, fp);
-
-      if(lido < 1) {
-        printf("Erro ao ler registro");
-        return 1;
-      }
-
-      l.id = u_r.id + 1; // u_r => ultimo registo
-    }
-
-    printf("digite o titulo do livro: ");
-    fgets(l.titulo, sizeof(l.titulo), stdin);
-    
-    int tam = strlen(l.titulo);
-
-    if(tam > 0 && l.titulo[tam -1] == '\n') l.titulo[tam -1] = '\0';
-    
-    printf("digite o ano de publicacao: ");
-    scanf("%d", &l.ano);
-
-    printf("digite o numero de autores (ate 3): ");
-    scanf("%d", &n_autor);
-    int c = getchar(); //por enquanto ja da
-
-    if(n_autor > 3) n_autor = 3;
-    if(n_autor < 1) n_autor = 1;
-
-    l.a_len = n_autor;
-
-    for(int i = 0; i < n_autor; i++){
-      printf("digite o nome do autor %d: ", i+1);
-      fgets(l.autor[i].nome, sizeof(l.autor[i].nome), stdin);
-      int tam_nome = strlen(l.autor[i].nome);
-
-      if(tam_nome > 0 && l.autor[i].nome[tam_nome -1]) 
-        l.autor[i].nome[tam_nome - 1] = '\0';
-    }
-
-    fwrite(&l, sizeof(struct Livro), 1, fp);
+  }else if(t == -1){
+    printf("erro ao ler tanho do arquivo\n");
+    return 1;
   }
+
+  Livro l = lCreate(id);
+
+  fwrite(&l, sizeof(Livro), 1, fp);
+
   return 0;
 }
 
