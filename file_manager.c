@@ -1,13 +1,14 @@
 #include <stdio.h>
-
-
 #include <string.h>
+
+// TODO: Definir um padrão para a posição final do cursor do arquivo
+// e documentar o comportamento das funções que manipulam o FILE *.
 
 typedef struct Livro Livro;
 
 int lAdd(FILE *fp);
 int lList(FILE *fp);
-int lUpdate(FILE *fp); 
+int lUpdate(FILE *fp);
 int lRemove(FILE *fp);
 
 Livro lSearch(FILE *fp);
@@ -30,8 +31,6 @@ struct Livro{
   int a_len; // quantidade de autores
   int ano;
 };
-
-//typedef struct Livro Livro;
 
 int main(void){
   FILE *fp = fopen("livros.dat", "r+b");
@@ -144,7 +143,7 @@ int lList(FILE *fp){
 
     printf("| %d | \n", registo.ano);
   }
-  
+
   return 0;
 }
 
@@ -169,14 +168,12 @@ int lUpdate(FILE *fp){
     }
   }
 
-  //printf("test\n %d | %d | %s \n", livro.id, livro.ano, livro.titulo);
-
   fseek(fp, -sizeof(Livro), SEEK_CUR);
 
   size_t result = fwrite(&livro, sizeof(Livro), 1, fp);
 
   if(result != 1) return 1;
-  
+
   return 0 ;
 }
 
@@ -211,11 +208,7 @@ Livro lSearch(FILE *fp){
   rewind(fp);
 
   printf("digite o titulo do livro para pesquisar\n");
-  fgets(titulo, sizeof(titulo), stdin);
-
-  int tam = strlen(titulo);
-
-  if(tam > 0 && titulo[tam - 1] == '\n') titulo[tam - 1] = '\0';
+  readLine(titulo, sizeof(titulo));
 
   while(fread(&l, sizeof(l), 1, fp) == 1){
     if(l.id == -1) continue;
@@ -270,10 +263,10 @@ Livro lCreate(int id){
 
   printf("digite o ano de publicacao: ");
   readInt(entrada_ano, sizeof(entrada_ano), &l.ano);
-  
+
   printf("digite o numero de autores (ate 3): ");
   readInt(entrada_autor, sizeof(entrada_autor), &n_autor);
-  
+
   if(n_autor > 3) n_autor = 3;
   if(n_autor < 1) n_autor = 1;
 
@@ -297,7 +290,7 @@ int readLine(char *buffer, int len){
 int readInt(char *buffer, int len, int *n){
   readLine(buffer, len);
 
-  if(sscanf(buffer, "%d", n)) 
+  if(sscanf(buffer, "%d", n) == 1)
     return 0;
 
   return 1;
