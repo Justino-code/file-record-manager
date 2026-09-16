@@ -17,6 +17,9 @@ int show(Livro l);
 long fileSize(FILE *fp);
                               //l = livro
 int getValue();
+
+void cleanStdin(void);
+
 int readLine(char *buffer, int len);
 int readInt(char *buffer, int len, int *n);
 
@@ -184,12 +187,12 @@ int lRemove(FILE *fp){
 
   if(livro.id == -1) return 1;
 
-  printf("eliminar?: S/n: \n");
+  printf("eliminar?: Y/n: \n");
   readLine(op, sizeof(op));
 
   if(strcmp(op, "n") == 0)
       return 1;
-  if(strcmp(op, "s") == 0 || strlen(op) == 0){
+  if(strcmp(op, "y") == 0 || strlen(op) == 0){
     fseek(fp, -sizeof(Livro), SEEK_CUR);
     size_t result = fwrite(&l_removido, sizeof(Livro), 1, fp);
 
@@ -281,6 +284,9 @@ Livro lCreate(int id){
 
 int readLine(char *buffer, int len){
   if(fgets(buffer, len, stdin) != NULL){
+    if(strchr(buffer, '\n') == NULL)
+      cleanStdin();
+
     buffer[strcspn(buffer, "\n")] = '\0';
     return 0;
   }
@@ -294,4 +300,10 @@ int readInt(char *buffer, int len, int *n){
     return 0;
 
   return 1;
+}
+
+void cleanStdin(void){
+  int ch;
+
+  while((ch = getchar()) != '\n' && ch != EOF);
 }
